@@ -47,7 +47,7 @@ class PlayerInteractListener : Listener {
         if (e.action == Action.RIGHT_CLICK_BLOCK) {
 
             // 如果玩家手持物品并且物品名中包含"SIGN"关键词
-            if (e.hasItem() && e.item.type.name.contains("SIGN", true)) {
+            if (e.hasItem() && e.item!!.type.name.contains("SIGN", true)) {
                 // 此时玩家可视为正在安放牌子
                 LockUtil.setLocation(e)
             }
@@ -56,7 +56,7 @@ class PlayerInteractListener : Listener {
                 if (LockData.PlayerisSneak[player] == null) {
                     return
                 }
-                val clickedBlockType = e.clickedBlock.location.block.type
+                val clickedBlockType = e.clickedBlock!!.location.block.type
                 if (clickedBlockType == Material.getMaterial(door)) {
 
                     // 如果门的上方有自动收费门的牌子,在CheckUtil内存入牌子和方块的位置
@@ -80,7 +80,7 @@ class PlayerInteractListener : Listener {
                         val delay = (originDelay.toDouble() / 50).toLong()
                         Inhibition.getInhibitStatus(player, Config.getInt(ConfigType.SETTING_ENTERDELAY.path), TimeUnit.MILLISECONDS)
                         val inhibit = Inhibition.getInhibitStatus(player, Config.getInt(ConfigType.SETTING_ENTERDELAY.path), TimeUnit.MILLISECONDS)
-                        Bukkit.getScheduler().runTaskLaterAsynchronously(Lock.instance, { LockData.ensure[player] = false }, delay)
+                        Bukkit.getScheduler().runTaskLaterAsynchronously(Lock.instance, Runnable{ LockData.ensure[player] = false }, delay)
                         LockData.ensure.putIfAbsent(player, false)
                         val ensure = LockData.ensure[player]!!
                         if (!inhibit && !ensure) {

@@ -10,6 +10,7 @@ import org.sct.lock.enumeration.ConfigType;
 import org.sct.lock.enumeration.LangType;
 import org.sct.lock.file.Config;
 import org.sct.lock.file.Lang;
+import org.sct.lock.util.function.nms.HoverText_v16;
 
 import java.util.Map;
 
@@ -19,7 +20,7 @@ import java.util.Map;
  */
 
 public class SignProcessUtil {
-    private static final HoverTextAPI hoverTextAPI = new HoverTextAPI();
+    private static final HoverText_v16 hoverTextAPI = new HoverText_v16();
 
     public static void processSign(SignChangeEvent e) {
         /*如果世界不匹配,返回*/
@@ -108,7 +109,7 @@ public class SignProcessUtil {
         }, 1);
     }
 
-    public static HoverTextAPI getHoverTextAPI() {
+    public static HoverText_v16 getHoverTextAPI() {
         return hoverTextAPI;
     }
 }

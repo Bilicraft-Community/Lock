@@ -34,7 +34,7 @@ class Lock : JavaPlugin() {
             CheckUpdate.check(Bukkit.getConsoleSender(), instance, "LovesAsuna", "ZDRlZWY4ZDZlMzIyNDExYjk3NThlMGNiN2ZmYzg3NTRiOGIwZDUzZA==")
         }
         saveDefaultConfig()
-        getCommand("lock").executor = SubCommandHandler(instance, "Lock")
+        getCommand("lock")!!.setExecutor(SubCommandHandler(instance, "Lock"))
         server.consoleSender.sendMessage("      ___       ___           ___           ___     ")
         server.consoleSender.sendMessage("     /\\__\\     /\\  \\         /\\  \\         /\\__\\")
         server.consoleSender.sendMessage("    /:/  /    /::\\  \\       /::\\  \\       /:/  /")

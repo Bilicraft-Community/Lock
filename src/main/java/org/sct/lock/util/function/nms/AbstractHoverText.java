@@ -1,4 +1,4 @@
-package org.sct.lock.util.function;
+package org.sct.lock.util.function.nms;
 
 import org.bukkit.Location;
 import org.sct.easylib.EasyLib;
@@ -11,39 +11,33 @@ import java.lang.reflect.Method;
 
 /**
  * @author LovesAsuna
- * @date 2020/3/22 14:30
- */
+ **/
+public abstract class AbstractHoverText implements HoverTextAPI {
+    protected Reflections reflections;
+    protected Class<?> craftWorld;
+    protected Class<?> worldServer;
+    protected Class<?> tileEntitySign;
+    protected Class<?> ChatModifier;
+    protected Class<?> BlockPosition;
+    protected Class<?> IChatBaseComponent;
+    protected Class<?> ChatHoverable;
+    protected Class<?> ChatComponentText;
 
-public class HoverTextAPI {
-    private Reflections reflections;
-    private Class<?> craftWorld;
-    private Class<?> worldServer;
-    private Class<?> tileEntitySign;
-    private Class<?> ChatModifier;
-    private Class<?> BlockPosition;
-    private Class<?> IChatBaseComponent;
-    private Class<?> ChatHoverable;
-    private Class<?> ChatComponentText;
-    private Class<Enum<?>> EnumHoverAction;
+    protected Method getHandle;
 
-    private Method getHandle;
+    protected Method getTileEntity;
+    protected Method getChatModifier;
+    protected Method setChatHoverable;
+    protected Method getHoverEvent;
 
-    private Method getTileEntity;
-    private Method getChatModifier;
-    private Method setChatHoverable;
-    private Method getHoverEvent;
-    private Method b;
+    protected Field lines;
 
-    private Field lines;
+    protected Constructor<?> BlockPositionConstructor;
+    protected Constructor<?> ChatComponentTextConstructor;
 
-    private Constructor<?> BlockPositionConstructor;
-    private Constructor<?> ChatHoverableConstructor;
-    private Constructor<?> ChatComponentTextConstructor;
-
-    private Object EnumHoverActionShowText;
 
     //todo 修复1.16.5不能使用的bug
-    public HoverTextAPI() {
+    public AbstractHoverText() {
         Reflections reflections = new Reflections(EasyLib.getInstance());
         try {
             craftWorld = reflections.getBukkitClass("CraftWorld");
@@ -54,7 +48,6 @@ public class HoverTextAPI {
             IChatBaseComponent = reflections.getMinecraftClass("IChatBaseComponent");
             ChatHoverable = reflections.getMinecraftClass("ChatHoverable");
             ChatComponentText = reflections.getMinecraftClass("ChatComponentText");
-            EnumHoverAction = getAnyMineCraftEnum();
             getHandle = craftWorld.getDeclaredMethod("getHandle");
 
             if (VersionChecker.Version.getCurrent().isEqualOrHigher(VersionChecker.Version.v1_13_R3)) {
@@ -74,13 +67,9 @@ public class HoverTextAPI {
             getChatModifier = IChatBaseComponent.getDeclaredMethod("getChatModifier");
             getChatModifier.setAccessible(true);
             setChatHoverable = ChatModifier.getDeclaredMethod("setChatHoverable", ChatHoverable);
-            b = ChatHoverable.getDeclaredMethod("b");
 
             BlockPositionConstructor = BlockPosition.getDeclaredConstructor(int.class, int.class, int.class);
-            ChatHoverableConstructor = ChatHoverable.getDeclaredConstructor(EnumHoverAction, IChatBaseComponent);
             ChatComponentTextConstructor = ChatComponentText.getDeclaredConstructor(String.class);
-
-            EnumHoverActionShowText = enumField(EnumHoverAction, "SHOW_TEXT");
 
             lines = tileEntitySign.getDeclaredField("lines");
         } catch (ReflectiveOperationException e) {
@@ -88,49 +77,13 @@ public class HoverTextAPI {
         }
     }
 
-    public void saveText(Location location, String text) {
-        try {
-            Object ChatModifier = getChatModifier(location);
+    @Override
+    public abstract void saveText(Location location, String text);
 
-            if (ChatModifier == null) {
-                // 不是牌子
-                return;
-            }
-            Object ChatComponentText = ChatComponentTextConstructor.newInstance(text);
-            Object ChatHoverable = ChatHoverableConstructor.newInstance(EnumHoverActionShowText, ChatComponentText);
+    @Override
+    public abstract String getText(Location location);
 
-            setChatHoverable.invoke(ChatModifier, ChatHoverable);
-        } catch (ReflectiveOperationException | NullPointerException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public String getText(Location location) {
-        try {
-            Object ChatModifier = getChatModifier(location);
-            if (ChatModifier == null) {
-                // 不是牌子
-                return null;
-            }
-
-            Object ChatHoverable = getHoverEvent.invoke(ChatModifier);
-            Object IChatBaseComponent = null;
-            try {
-                IChatBaseComponent = b.invoke(ChatHoverable);
-            } catch (NullPointerException e) {
-                // 牌子上无消息
-                return null;
-            }
-
-            Method getText = this.IChatBaseComponent.getDeclaredMethod("getText");
-            return (String) getText.invoke(IChatBaseComponent);
-        } catch (ReflectiveOperationException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public Object getChatModifier(Location location) {
+    protected Object getChatModifier(Location location) {
         int x = location.getBlockX();
         int y = location.getBlockY();
         int z = location.getBlockZ();
@@ -138,7 +91,7 @@ public class HoverTextAPI {
         try {
             Object worldServer = getHandle.invoke(location.getWorld());
             Object blockPosition = BlockPositionConstructor.newInstance(x, y, z);
-            Object tileEntitySign = null;
+            Object tileEntitySign;
             if (VersionChecker.Version.getCurrent().isEqualOrHigher(VersionChecker.Version.v1_15_R1)) {
                 tileEntitySign = getTileEntity.invoke(worldServer, blockPosition, true);
             } else {
@@ -158,9 +111,8 @@ public class HoverTextAPI {
         }
     }
 
-
     @SuppressWarnings("unchecked")
-    private Class<Enum<?>> getAnyMineCraftEnum() {
+    protected Class<Enum<?>> getAnyMineCraftEnum() {
         try {
             return (Class<Enum<?>>) ChatHoverable.getClasses()[0];
         } catch (Exception e) {
@@ -177,6 +129,5 @@ public class HoverTextAPI {
             throw new RuntimeException(e);
         }
     }
-
 
 }
