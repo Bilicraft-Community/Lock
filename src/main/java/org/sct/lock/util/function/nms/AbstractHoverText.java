@@ -38,7 +38,7 @@ public abstract class AbstractHoverText implements HoverTextAPI {
 
     //todo 修复1.16.5不能使用的bug
     public AbstractHoverText() {
-        Reflections reflections = new Reflections(EasyLib.getInstance());
+        reflections = new Reflections(EasyLib.getInstance());
         try {
             craftWorld = reflections.getBukkitClass("CraftWorld");
             worldServer = reflections.getMinecraftClass("WorldServer");
