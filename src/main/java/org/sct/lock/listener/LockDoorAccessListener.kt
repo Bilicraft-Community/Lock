@@ -55,7 +55,7 @@ class LockDoorAccessListener : Listener {
                     val moneyDetail = LockUtil.getMoneydetail(line, currentMoney, money)
                     val symbol = moneyDetail.keys.iterator().next()
                     val access = moneyDetail[symbol]!!
-                    if (!access && !symbol.isEmpty()) {
+                    if (!access && symbol.isNotEmpty()) {
                         e.payer.sendMessage(BasicUtil.replace(Lang.getString(LangType.LANG_DENYMONEY.path), "%needmoney", symbol + money))
                         return
                     }
